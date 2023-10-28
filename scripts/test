@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -o pipefail
+set -e
+
+source .env
+
+# if we are a tty
+if [ -t 1 ]; then
+  swift test 2>&1 | sed -E $'s/.*error.*/\\\e[31m&\\\e[0m/g'
+else
+  swift test
+fi
