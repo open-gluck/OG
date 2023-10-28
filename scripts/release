@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+
+newtag=$(git describe --abbrev=0 --tags | awk -F. '{print $1"."$2"."$3+1}')
+
+cat <<EOF >Sources/OG/OGVersion.swift
+// this file is generated automatically by the build system
+// do not modify this file manually
+public extension OG {
+    static let VERSION = "$newtag"
+}
+EOF
+cat <<EOF >Sources/DiablyLib/DiablyLibVersion.swift
+// this file is generated automatically by the build system
+// do not modify this file manually
+public extension DiablyLib {
+    static let VERSION = "$newtag"
+}
+EOF
+git commit -a -m 'Bump versions in Swift files'
+
+git tag $newtag -m 'Bump version'
+git push && git push origin $newtag
