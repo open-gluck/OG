@@ -5,7 +5,7 @@ This repository hosts a Swift Package Module to be used with apps using OpenGlü
 It contains two modules:
 
 - `OG`, for dealing with the OpenGlück server;
-- `Diably`, for all things related to the Diably apps.
+- `OGUI`, for all things related to the interface that application using OG might want to share, such as colors for low/high, etc.
 
 ## Configuration
 

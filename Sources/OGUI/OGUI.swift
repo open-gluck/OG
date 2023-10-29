@@ -1,6 +1,6 @@
 import SwiftUI
 
-public final class DiablyLib {
+public final class OGUI {
     private init() {}
 
     public static let thresholdNormalLow = 70.0

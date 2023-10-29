@@ -16,8 +16,8 @@ let package = Package(
             targets: ["OG"]
         ),
         .library(
-            name: "DiablyLib",
-            targets: ["DiablyLib"]
+            name: "OGUI",
+            targets: ["OGUI"]
         ),
         .executable(
             name: "cli",
@@ -37,12 +37,12 @@ let package = Package(
             name: "SwiftUI"
         ),
         .target(
-            name: "DiablyLib",
+            name: "OGUI",
             dependencies: ["OG"]
         ),
         .testTarget(
-            name: "DiablyLibTests",
-            dependencies: ["SwiftUI", "DiablyLib"]
+            name: "OGUITests",
+            dependencies: ["SwiftUI", "OGUI"]
         ),
         .executableTarget(
             name: "CLI",

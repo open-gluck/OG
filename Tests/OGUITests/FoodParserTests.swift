@@ -1,4 +1,4 @@
-@testable import DiablyLib
+@testable import OGUI
 import XCTest
 
 final class FoodParserTests: XCTestCase {
