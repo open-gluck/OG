@@ -2,7 +2,7 @@ import Foundation
 import OG
 import SwiftUI
 
-public enum DiablySandbox {
+public enum OGUISandbox {
     public static func getRecordMgDl(record: OpenGlückGlucoseRecord) -> Int {
         return record.mgDl
     }

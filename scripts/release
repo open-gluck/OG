@@ -11,10 +11,10 @@ public extension OG {
     static let VERSION = "$newtag"
 }
 EOF
-cat <<EOF >Sources/DiablyLib/DiablyLibVersion.swift
+cat <<EOF >Sources/OGUI/OGUIVersion.swift
 // this file is generated automatically by the build system
 // do not modify this file manually
-public extension DiablyLib {
+public extension OGUI {
     static let VERSION = "$newtag"
 }
 EOF
