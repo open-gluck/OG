@@ -2,7 +2,7 @@
 
 set -e
 
-newtag=$(git describe --abbrev=0 --tags | awk -F. '{print $1"."$2"."$3+1}')
+newtag=$(git tag -l | sort -t "." -k1,1n -k2,2n -k3,3n | tail -n1 | awk -F. '{print $1"."$2"."$3+1}')
 
 cat <<EOF >Sources/OG/OGVersion.swift
 // this file is generated automatically by the build system
