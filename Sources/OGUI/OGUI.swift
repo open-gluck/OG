@@ -3,10 +3,12 @@ import SwiftUI
 public final class OGUI {
     private init() {}
 
-    public static let thresholdNormalLow = 70.0
-    public static let thresholdNormalHigh = 150.0
-    public static let thresholdLow = 60.0
-    public static let thresholdHighVeryHigh = 240.0
+    public static var thresholdsDelegate: OGUIThresholdsDelegate = .init()
+
+    public static var thresholdNormalLow: Double { thresholdsDelegate.normalLow }
+    public static var thresholdNormalHigh: Double { thresholdsDelegate.normalHigh }
+    public static var thresholdLow: Double { thresholdsDelegate.low }
+    public static var thresholdHighVeryHigh: Double { thresholdsDelegate.highVeryHigh }
 
     public static let lowColor = Color(red: 229 / 256, green: 0 / 256, blue: 5 / 256)
     public static let lowColorText = Color(red: 255 / 256, green: 255 / 256, blue: 255 / 256)
