@@ -8,6 +8,7 @@ public final class OGUI {
     public static var thresholdNormalLow: Double { thresholdsDelegate.normalLow }
     public static var thresholdNormalHigh: Double { thresholdsDelegate.normalHigh }
     public static var thresholdLow: Double { thresholdsDelegate.low }
+    public static var thresholdHigh: Double { thresholdsDelegate.high }
     public static var thresholdHighVeryHigh: Double { thresholdsDelegate.highVeryHigh }
 
     public static let lowColor = Color(red: 229 / 256, green: 0 / 256, blue: 5 / 256)
