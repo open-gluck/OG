@@ -3,7 +3,7 @@ import SwiftUI
 public final class OGUI {
     private init() {}
 
-    public static var thresholdsDelegate: OGUIThresholdsDelegate = .init()
+    public static var thresholdsDelegate: OGUIThresholdsDelegate = DefaultOGUIThresholdsDelegate()
 
     public static var thresholdNormalLow: Double { thresholdsDelegate.normalLow }
     public static var thresholdNormalHigh: Double { thresholdsDelegate.normalHigh }
