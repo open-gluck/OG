@@ -5,7 +5,7 @@
 import Foundation
 
 public protocol OpenGlückSyncClientDelegate: AnyObject {
-    func getClient() -> OpenGlückClient
+    func getClient() -> OpenGlückClient?
 }
 
 public class OpenGlückSyncClient {
@@ -27,7 +27,7 @@ public class OpenGlückSyncClient {
 
     public init() {}
 
-    var client: OpenGlückClient {
+    var client: OpenGlückClient? {
         delegate!.getClient()
     }
 }
@@ -43,6 +43,9 @@ public extension OpenGlückSyncClient {
     func getCurrentDataIfChanged() async throws -> CurrentData? {
         await semaphore.wait()
         defer { Task { await semaphore.release() } }
+        guard let client else {
+            return nil
+        }
         lastSyncCurrentDataStart = Date()
         let result = try await client.getCurrentDataIfNoneMatch(revision: lastSyncCurrentData?.revision)
         lastSyncCurrentDataEnd = Date()
@@ -53,9 +56,12 @@ public extension OpenGlückSyncClient {
         return result
     }
 
-    func getCurrentData() async throws -> CurrentData {
+    func getCurrentData() async throws -> CurrentData? {
         await semaphore.wait()
         defer { Task { await semaphore.release() } }
+        guard let client else {
+            return nil
+        }
         lastSyncCurrentDataStart = Date()
         let result = try await client.getCurrentDataIfNoneMatch(revision: lastSyncCurrentData?.revision)
         lastSyncCurrentDataEnd = Date()
@@ -81,6 +87,9 @@ public extension OpenGlückSyncClient {
     func getLastDataIfChanged() async throws -> LastData? {
         await semaphore.wait()
         defer { Task { await semaphore.release() } }
+        guard let client else {
+            return nil
+        }
         lastSyncLastDataStart = Date()
         let result = try await client.getLastDataIfNoneMatch(revision: lastSyncLastData?.revision)
         lastSyncLastDataEnd = Date()
@@ -91,9 +100,12 @@ public extension OpenGlückSyncClient {
         return result
     }
 
-    func getLastData() async throws -> LastData {
+    func getLastData() async throws -> LastData? {
         await semaphore.wait()
         defer { Task { await semaphore.release() } }
+        guard let client else {
+            return nil
+        }
         lastSyncLastDataStart = Date()
         let result = try await client.getLastDataIfNoneMatch(revision: lastSyncLastData?.revision)
         lastSyncLastDataEnd = Date()

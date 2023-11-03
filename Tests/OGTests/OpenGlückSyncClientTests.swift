@@ -9,7 +9,7 @@ final class OpenGlückSyncClientTests: XCTestCase, OpenGlückSyncClientDelegate 
         return OpenGlückClient(hostname: hostname, token: token, target: "OGTests")
     }
 
-    func getClient() -> OpenGlückClient {
+    func getClient() -> OpenGlückClient? {
         client
     }
 
