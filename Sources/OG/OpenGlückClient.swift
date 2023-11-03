@@ -37,8 +37,8 @@ public class OpenGlückClient {
 }
 
 public extension OpenGlückClient {
-    func getLastData() async throws -> LastData {
-        return try await getLastDataIfNoneMatch(revision: nil)!
+    func getLastData() async throws -> LastData? {
+        return try await getLastDataIfNoneMatch(revision: nil)
     }
 
     private var origin: String {
