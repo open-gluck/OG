@@ -22,7 +22,7 @@ final class OpenGlückTests: XCTestCase {
     }
 
     func testGetCurrentData() async throws {
-        let currentData = try await client.getCurrentData()
+        let currentData = try await client.getCurrentData()!
         XCTAssertNotNil(currentData)
         let revision = currentData.revision
         let currentDataIfNoneMatch = try await client.getCurrentDataIfNoneMatch(revision: revision)

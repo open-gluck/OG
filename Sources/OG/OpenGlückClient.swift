@@ -85,8 +85,8 @@ public extension OpenGlückClient {
         }
     }
 
-    func getCurrentData() async throws -> CurrentData {
-        return try await getCurrentDataIfNoneMatch(revision: nil)!
+    func getCurrentData() async throws -> CurrentData? {
+        return try await getCurrentDataIfNoneMatch(revision: nil)
     }
 
     func getCurrentDataIfNoneMatch(revision: Int64?) async throws -> CurrentData? {
