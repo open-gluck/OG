@@ -3,6 +3,9 @@ SHELL := /bin/bash
 test:
 	./scripts/test
 
+clean:
+	rm -rf .build
+
 assert-clean:
 	@if [ -n "$$(git status --porcelain)" ]; then \
 		echo "Working directory is not clean. Please commit all changes before releasing."; \
@@ -22,4 +25,4 @@ swiftlint:
 cli:
 	@source .env && swift run cli
 
-.PHONY: assert-clean prerelease release test lint swiftlint cli
+.PHONY: assert-clean prerelease release clean test lint swiftlint cli

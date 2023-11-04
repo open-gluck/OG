@@ -1,7 +1,7 @@
 @preconcurrency import struct Foundation.Date
 @preconcurrency import struct Foundation.UUID
 
-public enum OpenGlückGlucoseSpeed: String, Codable, Sendable {
+public enum OpenGluckGlucoseSpeed: String, Codable, Sendable {
     case auto
     case custom
     case fast
@@ -9,11 +9,11 @@ public enum OpenGlückGlucoseSpeed: String, Codable, Sendable {
     case slow
 }
 
-public struct OpenGlückPossibleCompressorsValue: Hashable, Codable, Sendable {
-    public let glucoseSpeed: OpenGlückGlucoseSpeed
+public struct OpenGluckPossibleCompressorsValue: Hashable, Codable, Sendable {
+    public let glucoseSpeed: OpenGluckGlucoseSpeed
     public let comp: Double?
 
-    public init(glucoseSpeed: OpenGlückGlucoseSpeed, comp: Double?) {
+    public init(glucoseSpeed: OpenGluckGlucoseSpeed, comp: Double?) {
         self.glucoseSpeed = glucoseSpeed
         self.comp = comp
     }
@@ -25,7 +25,7 @@ public struct OpenGlückPossibleCompressorsValue: Hashable, Codable, Sendable {
 
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        glucoseSpeed = try values.decode(OpenGlückGlucoseSpeed.self, forKey: .glucoseSpeed)
+        glucoseSpeed = try values.decode(OpenGluckGlucoseSpeed.self, forKey: .glucoseSpeed)
         comp = try values.decodeIfPresent(Double.self, forKey: .comp)
     }
 
@@ -36,17 +36,17 @@ public struct OpenGlückPossibleCompressorsValue: Hashable, Codable, Sendable {
     }
 }
 
-public struct OpenGlückFoodRecord: Hashable, Codable, Sendable {
+public struct OpenGluckFoodRecord: Hashable, Codable, Sendable {
     public let id: UUID
     public let timestamp: Date
     public let deleted: Bool
     public let name: String
     public let carbs: Double?
-    public let comps: OpenGlückPossibleCompressorsValue
+    public let comps: OpenGluckPossibleCompressorsValue
     public let recordUntil: Date?
     public let rememberRecording: Bool
 
-    public init(id: UUID, timestamp: Date, deleted: Bool, name: String, carbs: Double?, comps: OpenGlückPossibleCompressorsValue, recordUntil: Date?, rememberRecording: Bool) {
+    public init(id: UUID, timestamp: Date, deleted: Bool, name: String, carbs: Double?, comps: OpenGluckPossibleCompressorsValue, recordUntil: Date?, rememberRecording: Bool) {
         self.id = id
         self.timestamp = timestamp
         self.deleted = deleted
@@ -75,7 +75,7 @@ public struct OpenGlückFoodRecord: Hashable, Codable, Sendable {
         deleted = try values.decode(Bool.self, forKey: .deleted)
         name = try values.decode(String.self, forKey: .name)
         carbs = try values.decodeIfPresent(Double.self, forKey: .carbs)
-        comps = try values.decode(OpenGlückPossibleCompressorsValue.self, forKey: .comps)
+        comps = try values.decode(OpenGluckPossibleCompressorsValue.self, forKey: .comps)
         recordUntil = try values.decodeIfPresent(Date.self, forKey: .recordUntil)
         rememberRecording = try values.decode(Bool.self, forKey: .rememberRecording)
     }

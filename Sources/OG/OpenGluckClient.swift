@@ -1,11 +1,11 @@
 import Foundation
 
-public enum OpenGlückClientError: Error {
+public enum OpenGluckClientError: Error {
     case noData
     case uploadFailed(message: String)
 }
 
-public class OpenGlückClient {
+public class OpenGluckClient {
     let hostname: String
     let token: String
     let target: String
@@ -36,7 +36,7 @@ public class OpenGlückClient {
     }
 }
 
-public extension OpenGlückClient {
+public extension OpenGluckClient {
     func getLastData() async throws -> LastData? {
         return try await getLastDataIfNoneMatch(revision: nil)
     }
@@ -62,7 +62,7 @@ public extension OpenGlückClient {
                         return
                     }
                     guard let data else {
-                        continuation.resume(throwing: OpenGlückClientError.noData)
+                        continuation.resume(throwing: OpenGluckClientError.noData)
                         return
                     }
 
@@ -106,7 +106,7 @@ public extension OpenGlückClient {
                             // print("GOT RESPONSE \(response)")
 
                             guard let data else {
-                                continuation.resume(throwing: OpenGlückClientError.noData)
+                                continuation.resume(throwing: OpenGluckClientError.noData)
                                 return
                             }
 
@@ -131,8 +131,8 @@ public extension OpenGlückClient {
 }
 
 /* glucose */
-public extension OpenGlückClient {
-    func findGlucoseRecords(from: Date, until: Date) async throws -> [OpenGlückGlucoseRecord] {
+public extension OpenGluckClient {
+    func findGlucoseRecords(from: Date, until: Date) async throws -> [OpenGluckGlucoseRecord] {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
             var components = URLComponents()
@@ -146,11 +146,11 @@ public extension OpenGlückClient {
                     Task {
                         do {
                             guard let data else {
-                                continuation.resume(throwing: OpenGlückClientError.noData)
+                                continuation.resume(throwing: OpenGluckClientError.noData)
                                 return
                             }
 
-                            let glucoseRecords = try self.jsonDecoder.decode([OpenGlückGlucoseRecord].self, from: data)
+                            let glucoseRecords = try self.jsonDecoder.decode([OpenGluckGlucoseRecord].self, from: data)
                             continuation.resume(returning: glucoseRecords)
                         } catch {
                             continuation.resume(throwing: error)
@@ -166,7 +166,7 @@ public extension OpenGlückClient {
 }
 
 /* cgm properties */
-public extension OpenGlückClient {
+public extension OpenGluckClient {
     func getHasRealTime() async throws -> Bool? {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
@@ -176,7 +176,7 @@ public extension OpenGlückClient {
                     Task {
                         do {
                             guard let data else {
-                                continuation.resume(throwing: OpenGlückClientError.noData)
+                                continuation.resume(throwing: OpenGluckClientError.noData)
                                 return
                             }
 
@@ -197,7 +197,7 @@ public extension OpenGlückClient {
 }
 
 /* episodes */
-public extension OpenGlückClient {
+public extension OpenGluckClient {
     func getCurrentEpisode() async throws -> (Episode?, Date?) {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
@@ -231,7 +231,7 @@ public extension OpenGlückClient {
 }
 
 /* record logs */
-public extension OpenGlückClient {
+public extension OpenGluckClient {
     private func toISO8601(_ date: Date = Date()) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
@@ -286,7 +286,7 @@ public extension OpenGlückClient {
 }
 
 /* APN token registration */
-extension OpenGlückClient {
+extension OpenGluckClient {
     private var app: String {
         #if os(iOS)
             return "iOS"
@@ -344,18 +344,18 @@ extension OpenGlückClient {
 }
 
 /* Upload */
-public struct OpenGlückUploadResult: Codable, Sendable {
+public struct OpenGluckUploadResult: Codable, Sendable {
     public let revision: Int64
 }
 
-public extension OpenGlückClient {
-    internal struct OpenGlückUploadRequest: Encodable {
+public extension OpenGluckClient {
+    internal struct OpenGluckUploadRequest: Encodable {
         public let currentCgmProperties: CgmCurrentDeviceProperties?
-        public let device: OpenGlückDevice?
-        public let glucoseRecords: [OpenGlückGlucoseRecord]?
-        public let lowRecords: [OpenGlückLowRecord]?
-        public let insulinRecords: [OpenGlückInsulinRecord]?
-        public let foodRecords: [OpenGlückFoodRecord]?
+        public let device: OpenGluckDevice?
+        public let glucoseRecords: [OpenGluckGlucoseRecord]?
+        public let lowRecords: [OpenGluckLowRecord]?
+        public let insulinRecords: [OpenGluckInsulinRecord]?
+        public let foodRecords: [OpenGluckFoodRecord]?
 
         // swiftlint:disable nesting
         enum CodingKeys: String, CodingKey {
@@ -392,29 +392,29 @@ public extension OpenGlückClient {
         }
     }
 
-    func upload(currentCgmProperties: CgmCurrentDeviceProperties? = nil, device: OpenGlückDevice? = nil, glucoseRecords: [OpenGlückGlucoseRecord]? = nil, lowRecords: [OpenGlückLowRecord]? = nil, insulinRecords: [OpenGlückInsulinRecord]? = nil, foodRecords: [OpenGlückFoodRecord]? = nil) async throws -> OpenGlückUploadResult {
+    func upload(currentCgmProperties: CgmCurrentDeviceProperties? = nil, device: OpenGluckDevice? = nil, glucoseRecords: [OpenGluckGlucoseRecord]? = nil, lowRecords: [OpenGluckLowRecord]? = nil, insulinRecords: [OpenGluckInsulinRecord]? = nil, foodRecords: [OpenGluckFoodRecord]? = nil) async throws -> OpenGluckUploadResult {
         try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
             let uploadData: Data
             do {
-                uploadData = try jsonEncoder.encode(OpenGlückUploadRequest(currentCgmProperties: currentCgmProperties, device: device, glucoseRecords: glucoseRecords, lowRecords: lowRecords, insulinRecords: insulinRecords, foodRecords: foodRecords))
+                uploadData = try jsonEncoder.encode(OpenGluckUploadRequest(currentCgmProperties: currentCgmProperties, device: device, glucoseRecords: glucoseRecords, lowRecords: lowRecords, insulinRecords: insulinRecords, foodRecords: foodRecords))
             } catch {
                 continuation.resume(throwing: error)
                 return
             }
             client.post(url: URL(string: "\(origin)/opengluck/upload")!, body: uploadData, onComplete: { response, data in
                 guard let data else {
-                    continuation.resume(throwing: OpenGlückClientError.noData)
+                    continuation.resume(throwing: OpenGluckClientError.noData)
                     return
                 }
                 guard response.statusCode == 200 else {
                     let body = String(data: data, encoding: .utf8) ?? "(no body)"
-                    continuation.resume(throwing: OpenGlückClientError.uploadFailed(message: "Received status code \(response.statusCode), body: \(body)"))
+                    continuation.resume(throwing: OpenGluckClientError.uploadFailed(message: "Received status code \(response.statusCode), body: \(body)"))
                     return
                 }
-                let result: OpenGlückUploadResult
+                let result: OpenGluckUploadResult
                 do {
-                    result = try self.jsonDecoder.decode(OpenGlückUploadResult.self, from: data)
+                    result = try self.jsonDecoder.decode(OpenGluckUploadResult.self, from: data)
                 } catch {
                     continuation.resume(throwing: error)
                     return
@@ -429,9 +429,9 @@ public extension OpenGlückClient {
 }
 
 /* instant glucose */
-public extension OpenGlückClient {
-    internal struct OpenGlückUploadInstantGlucoseUploadRequest: Encodable {
-        public let instantGlucoseRecords: [OpenGlückInstantGlucoseRecord]
+public extension OpenGluckClient {
+    internal struct OpenGluckUploadInstantGlucoseUploadRequest: Encodable {
+        public let instantGlucoseRecords: [OpenGluckInstantGlucoseRecord]
 
         // swiftlint:disable nesting
         enum CodingKeys: String, CodingKey {
@@ -446,34 +446,34 @@ public extension OpenGlückClient {
         }
     }
 
-    struct OpenGlückUploadInstantGlucoseResult: Codable {
+    struct OpenGluckUploadInstantGlucoseResult: Codable {
         public let success: Bool
         public let status: String
     }
 
-    func upload(instantGlucoseRecords: [OpenGlückInstantGlucoseRecord]) async throws -> OpenGlückUploadInstantGlucoseResult {
+    func upload(instantGlucoseRecords: [OpenGluckInstantGlucoseRecord]) async throws -> OpenGluckUploadInstantGlucoseResult {
         try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
             let uploadData: Data
             do {
-                uploadData = try jsonEncoder.encode(OpenGlückUploadInstantGlucoseUploadRequest(instantGlucoseRecords: instantGlucoseRecords))
+                uploadData = try jsonEncoder.encode(OpenGluckUploadInstantGlucoseUploadRequest(instantGlucoseRecords: instantGlucoseRecords))
             } catch {
                 continuation.resume(throwing: error)
                 return
             }
             client.post(url: URL(string: "\(origin)/opengluck/instant-glucose/upload")!, body: uploadData, onComplete: { response, data in
                 guard let data else {
-                    continuation.resume(throwing: OpenGlückClientError.noData)
+                    continuation.resume(throwing: OpenGluckClientError.noData)
                     return
                 }
                 guard response.statusCode == 200 else {
                     let body = String(data: data, encoding: .utf8) ?? "(no body)"
-                    continuation.resume(throwing: OpenGlückClientError.uploadFailed(message: "Received status code \(response.statusCode), body: \(body)"))
+                    continuation.resume(throwing: OpenGluckClientError.uploadFailed(message: "Received status code \(response.statusCode), body: \(body)"))
                     return
                 }
-                let result: OpenGlückUploadInstantGlucoseResult
+                let result: OpenGluckUploadInstantGlucoseResult
                 do {
-                    result = try self.jsonDecoder.decode(OpenGlückUploadInstantGlucoseResult.self, from: data)
+                    result = try self.jsonDecoder.decode(OpenGluckUploadInstantGlucoseResult.self, from: data)
                 } catch {
                     continuation.resume(throwing: error)
                     return

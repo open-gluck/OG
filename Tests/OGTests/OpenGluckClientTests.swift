@@ -1,12 +1,12 @@
 @testable import OG
 import XCTest
 
-final class OpenGlückTests: XCTestCase {
-    private var client: OpenGlückClient {
+final class OpenGluckTests: XCTestCase {
+    private var client: OpenGluckClient {
         let token = ProcessInfo.processInfo.environment["TEST_OPENGLUCK_TOKEN"]!
         let hostname = ProcessInfo.processInfo.environment["TEST_OPENGLUCK_HOSTNAME"]!
 
-        return OpenGlückClient(hostname: hostname, token: token, target: "OGTests")
+        return OpenGluckClient(hostname: hostname, token: token, target: "OGTests")
     }
 
     func testLastData() async throws {
@@ -37,8 +37,8 @@ final class OpenGlückTests: XCTestCase {
     func testUpload() async throws {
         let timestampOneHourAgo = Date().addingTimeInterval(-3600)
         let timestampTwoHoursAgo = Date().addingTimeInterval(-2 * 3600)
-        let lowRecords: [OpenGlückLowRecord] = [.init(id: UUID(), timestamp: timestampOneHourAgo, sugarInGrams: 20, deleted: false)]
-        let insulinRecords: [OpenGlückInsulinRecord] = [.init(id: UUID(), timestamp: timestampTwoHoursAgo, units: 5, deleted: false)]
+        let lowRecords: [OpenGluckLowRecord] = [.init(id: UUID(), timestamp: timestampOneHourAgo, sugarInGrams: 20, deleted: false)]
+        let insulinRecords: [OpenGluckInsulinRecord] = [.init(id: UUID(), timestamp: timestampTwoHoursAgo, units: 5, deleted: false)]
         let result = try await client.upload(lowRecords: lowRecords, insulinRecords: insulinRecords)
         let revision = result.revision
         XCTAssertGreaterThanOrEqual(revision, 0)

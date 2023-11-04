@@ -4,7 +4,7 @@ import OG
 let token = ProcessInfo.processInfo.environment["TEST_OPENGLUCK_TOKEN"]!
 let hostname = ProcessInfo.processInfo.environment["TEST_OPENGLUCK_HOSTNAME"]!
 
-let ogClient = OpenGlückClient(hostname: hostname, token: token, target: "cli")
+let ogClient = OpenGluckClient(hostname: hostname, token: token, target: "cli")
 
 let records = try await ogClient.getLastData()
 print(records)

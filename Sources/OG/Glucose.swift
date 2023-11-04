@@ -1,6 +1,6 @@
 @preconcurrency import struct Foundation.Date
 
-public struct OpenGlückGlucoseRecord: Hashable, Codable, Sendable {
+public struct OpenGluckGlucoseRecord: Hashable, Codable, Sendable {
     // this struct is not called GlucoseRecord so as not to conflict with GlucoseRecord from deps
     public let timestamp: Date
     public let mgDl: Int

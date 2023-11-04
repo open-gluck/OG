@@ -4,18 +4,18 @@
 
 import Foundation
 
-public protocol OpenGlückSyncClientDelegate: AnyObject {
-    func getClient() -> OpenGlückClient?
+public protocol OpenGluckSyncClientDelegate: AnyObject {
+    func getClient() -> OpenGluckClient?
 }
 
-public class OpenGlückSyncClient {
+public class OpenGluckSyncClient {
     enum SyncError: Error {
         case noCurrentData
         case noLastData
     }
 
     let semaphore = AsyncSemaphore()
-    public var delegate: OpenGlückSyncClientDelegate?
+    public var delegate: OpenGluckSyncClientDelegate?
 
     public private(set) var lastSyncCurrentData: CurrentData?
     public private(set) var lastSyncCurrentDataStart: Date?
@@ -27,12 +27,12 @@ public class OpenGlückSyncClient {
 
     public init() {}
 
-    var client: OpenGlückClient? {
+    var client: OpenGluckClient? {
         delegate!.getClient()
     }
 }
 
-public extension OpenGlückSyncClient {
+public extension OpenGluckSyncClient {
     internal var durationSinceLastSyncCurrentData: TimeInterval? {
         guard let lastSyncCurrentDataEnd else {
             return nil
@@ -76,7 +76,7 @@ public extension OpenGlückSyncClient {
     }
 }
 
-public extension OpenGlückSyncClient {
+public extension OpenGluckSyncClient {
     internal var durationSinceLastSyncLastData: TimeInterval? {
         guard let lastSyncLastDataEnd else {
             return nil

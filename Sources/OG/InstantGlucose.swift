@@ -1,6 +1,6 @@
 import Foundation
 
-public struct OpenGlückInstantGlucoseRecord: Hashable, Codable {
+public struct OpenGluckInstantGlucoseRecord: Hashable, Codable {
     public let timestamp: Date
     public let mgDl: Int
     public let modelName: String
