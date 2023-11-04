@@ -3,12 +3,12 @@ import OG
 import SwiftUI
 
 public enum OGUISandbox {
-    public static func getRecordMgDl(record: OpenGlückGlucoseRecord) -> Int {
+    public static func getRecordMgDl(record: OpenGluckGlucoseRecord) -> Int {
         return record.mgDl
     }
 
     public static func getSomeMgDl() -> Int {
-        let record = OpenGlückGlucoseRecord(timestamp: Date(), mgDl: 123)
+        let record = OpenGluckGlucoseRecord(timestamp: Date(), mgDl: 123)
         return Self.getRecordMgDl(record: record)
     }
 

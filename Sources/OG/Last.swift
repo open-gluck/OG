@@ -2,10 +2,10 @@ import Foundation
 
 public struct LastData: Codable, Sendable {
     public let revision: Int64
-    public let glucoseRecords: [OpenGlückGlucoseRecord]?
-    public let lowRecords: [OpenGlückLowRecord]?
-    public let insulinRecords: [OpenGlückInsulinRecord]?
-    public let foodRecords: [OpenGlückFoodRecord]?
+    public let glucoseRecords: [OpenGluckGlucoseRecord]?
+    public let lowRecords: [OpenGluckLowRecord]?
+    public let insulinRecords: [OpenGluckInsulinRecord]?
+    public let foodRecords: [OpenGluckFoodRecord]?
 
     enum CodingKeys: String, CodingKey {
         case revision
@@ -18,10 +18,10 @@ public struct LastData: Codable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         revision = try container.decode(Int64.self, forKey: .revision)
-        glucoseRecords = try container.decode([OpenGlückGlucoseRecord].self, forKey: .glucoseRecords)
-        lowRecords = try container.decodeIfPresent([OpenGlückLowRecord].self, forKey: .lowRecords) ?? []
-        insulinRecords = try container.decodeIfPresent([OpenGlückInsulinRecord].self, forKey: .insulinRecords) ?? []
-        foodRecords = try container.decodeIfPresent([OpenGlückFoodRecord].self, forKey: .foodRecords) ?? []
+        glucoseRecords = try container.decode([OpenGluckGlucoseRecord].self, forKey: .glucoseRecords)
+        lowRecords = try container.decodeIfPresent([OpenGluckLowRecord].self, forKey: .lowRecords) ?? []
+        insulinRecords = try container.decodeIfPresent([OpenGluckInsulinRecord].self, forKey: .insulinRecords) ?? []
+        foodRecords = try container.decodeIfPresent([OpenGluckFoodRecord].self, forKey: .foodRecords) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {

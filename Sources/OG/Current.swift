@@ -1,8 +1,8 @@
 import Foundation
 
 public struct CurrentData: Codable {
-    public let currentGlucoseRecord: OpenGlückGlucoseRecord?
-    public let lastHistoricGlucoseRecord: OpenGlückGlucoseRecord?
+    public let currentGlucoseRecord: OpenGluckGlucoseRecord?
+    public let lastHistoricGlucoseRecord: OpenGluckGlucoseRecord?
     public let currentEpisode: Episode
     public let currentEpisodeTimestamp: Date
     public let revision: Int64
@@ -19,10 +19,10 @@ public struct CurrentData: Codable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        currentGlucoseRecord = try container.decodeIfPresent(OpenGlückGlucoseRecord.self, forKey: .currentGlucoseRecord)
+        currentGlucoseRecord = try container.decodeIfPresent(OpenGluckGlucoseRecord.self, forKey: .currentGlucoseRecord)
         currentEpisode = try container.decodeIfPresent(Episode.self, forKey: .currentEpisode) ?? .unknown
         currentEpisodeTimestamp = try container.decodeIfPresent(Date.self, forKey: .currentEpisodeTimestamp) ?? Date(timeIntervalSince1970: 0)
-        lastHistoricGlucoseRecord = try container.decodeIfPresent(OpenGlückGlucoseRecord.self, forKey: .lastHistoricGlucoseRecord)
+        lastHistoricGlucoseRecord = try container.decodeIfPresent(OpenGluckGlucoseRecord.self, forKey: .lastHistoricGlucoseRecord)
         revision = try container.decodeIfPresent(Int64.self, forKey: .revision) ?? -1
         hasCgmRealTimeData = try container.decode(Bool.self, forKey: .hasCgmRealTimeData)
     }

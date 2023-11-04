@@ -1,7 +1,7 @@
 @preconcurrency import struct Foundation.Date
 @preconcurrency import struct Foundation.UUID
 
-public struct OpenGlückInsulinRecord: Hashable, Codable, Sendable {
+public struct OpenGluckInsulinRecord: Hashable, Codable, Sendable {
     public let id: UUID
     public let timestamp: Date
     public let units: Int

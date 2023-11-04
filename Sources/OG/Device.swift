@@ -1,6 +1,6 @@
 import Foundation
 
-public struct OpenGlückDevice: Hashable, Codable, Sendable {
+public struct OpenGluckDevice: Hashable, Codable, Sendable {
     public let modelName: String
     public let deviceId: String
 
