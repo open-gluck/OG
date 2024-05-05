@@ -1,4 +1,3 @@
-
 public class DefaultOGUIThresholdsDelegate: OGUIThresholdsDelegate {
     public init() {}
 
