@@ -8,14 +8,18 @@ public protocol OpenGluckSyncClientDelegate: AnyObject {
     func getClient() -> OpenGluckClient?
 }
 
-public class OpenGluckSyncClient {
+public actor OpenGluckSyncClient {
     enum SyncError: Error {
         case noCurrentData
         case noLastData
     }
 
     let semaphore = AsyncSemaphore()
-    public var delegate: OpenGluckSyncClientDelegate?
+    public private(set) var delegate: OpenGluckSyncClientDelegate?
+
+    public func setDelegate(_ delegate: OpenGluckSyncClientDelegate) {
+        self.delegate = delegate
+    }
 
     public private(set) var lastSyncCurrentData: CurrentData?
     public private(set) var lastSyncCurrentDataStart: Date?

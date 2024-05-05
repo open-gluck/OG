@@ -5,18 +5,11 @@ public enum OpenGluckClientError: Error {
     case uploadFailed(message: String)
 }
 
-public class OpenGluckClient {
-    let hostname: String
-    let token: String
-    let target: String
+public actor OpenGluckClientJsonCoders {
+    fileprivate let jsonDecoder: JSONDecoder
+    fileprivate let jsonEncoder: JSONEncoder
 
-    private let jsonDecoder: JSONDecoder
-    private let jsonEncoder: JSONEncoder
-
-    public init(hostname: String, token: String, target: String) {
-        self.hostname = hostname
-        self.token = token
-        self.target = target
+    init() {
         jsonDecoder = JSONDecoder()
         jsonDecoder.dateDecodingStrategy = .custom { decoder -> Date in
             let isoDateFormatter = ISO8601DateFormatter()
@@ -28,11 +21,34 @@ public class OpenGluckClient {
         jsonEncoder = JSONEncoder()
         jsonEncoder.dateEncodingStrategy = .iso8601
     }
+}
+
+public final class OpenGluckClient: Sendable {
+    let hostname: String
+    let token: String
+    let target: String
+
+    let coders: OpenGluckClientJsonCoders
+
+    public init(hostname: String, token: String, target: String) {
+        self.hostname = hostname
+        self.token = token
+        self.target = target
+        coders = OpenGluckClientJsonCoders()
+    }
 
     private func clientHeaders() -> [String: String] {
         [
             "Authorization": "Bearer \(token)",
         ]
+    }
+
+    private var jsonDecoder: JSONDecoder {
+        coders.jsonDecoder
+    }
+
+    private var jsonEncoder: JSONEncoder {
+        coders.jsonEncoder
     }
 }
 
