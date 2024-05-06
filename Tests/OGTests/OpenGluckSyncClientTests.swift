@@ -15,17 +15,21 @@ final class OpenGluckSyncClientTests: XCTestCase, OpenGluckSyncClientDelegate {
 
     func testGetCurrentData() async throws {
         let syncClient = OpenGluckSyncClient()
-        syncClient.delegate = self
-        XCTAssertNil(syncClient.durationSinceLastSyncCurrentData)
+        await syncClient.setDelegate(self)
+        let duration = await syncClient.durationSinceLastSyncCurrentData
+        XCTAssertNil(duration)
         _ = try await syncClient.getCurrentData()
-        XCTAssertTrue(syncClient.durationSinceLastSyncCurrentData! < 60)
+        let duration2 = await syncClient.durationSinceLastSyncCurrentData
+        XCTAssertTrue(duration2! < 60)
     }
 
     func testGetLastData() async throws {
         let syncClient = OpenGluckSyncClient()
-        syncClient.delegate = self
-        XCTAssertNil(syncClient.durationSinceLastSyncLastData)
+        await syncClient.setDelegate(self)
+        let duration = await syncClient.durationSinceLastSyncLastData
+        XCTAssertNil(duration)
         _ = try await syncClient.getLastData()
-        XCTAssertTrue(syncClient.durationSinceLastSyncLastData! < 60)
+        let duration2 = await syncClient.durationSinceLastSyncLastData
+        XCTAssertTrue(duration2! < 60)
     }
 }

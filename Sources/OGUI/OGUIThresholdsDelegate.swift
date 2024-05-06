@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol OGUIThresholdsDelegate {
+public protocol OGUIThresholdsDelegate: AnyObject {
     // when the blood glucose is below normalHigh, it is still considered
     // in the normal range until it reaches low, but in the low range
     var normalLow: Double { get }

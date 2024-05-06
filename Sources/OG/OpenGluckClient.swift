@@ -5,18 +5,11 @@ public enum OpenGluckClientError: Error {
     case uploadFailed(message: String)
 }
 
-public class OpenGluckClient {
-    let hostname: String
-    let token: String
-    let target: String
+public actor OpenGluckClientJsonCoders {
+    internal let jsonDecoder: JSONDecoder
+    internal let jsonEncoder: JSONEncoder
 
-    private let jsonDecoder: JSONDecoder
-    private let jsonEncoder: JSONEncoder
-
-    public init(hostname: String, token: String, target: String) {
-        self.hostname = hostname
-        self.token = token
-        self.target = target
+    init() {
         jsonDecoder = JSONDecoder()
         jsonDecoder.dateDecodingStrategy = .custom { decoder -> Date in
             let isoDateFormatter = ISO8601DateFormatter()
@@ -28,11 +21,34 @@ public class OpenGluckClient {
         jsonEncoder = JSONEncoder()
         jsonEncoder.dateEncodingStrategy = .iso8601
     }
+}
 
-    private func clientHeaders() -> [String: String] {
+public final class OpenGluckClient: Sendable {
+    let hostname: String
+    let token: String
+    let target: String
+
+    let coders: OpenGluckClientJsonCoders
+
+    public init(hostname: String, token: String, target: String) {
+        self.hostname = hostname
+        self.token = token
+        self.target = target
+        coders = OpenGluckClientJsonCoders()
+    }
+
+    internal func clientHeaders() -> [String: String] {
         [
             "Authorization": "Bearer \(token)",
         ]
+    }
+
+    internal var jsonDecoder: JSONDecoder {
+        coders.jsonDecoder
+    }
+
+    internal var jsonEncoder: JSONEncoder {
+        coders.jsonEncoder
     }
 }
 
@@ -41,7 +57,7 @@ public extension OpenGluckClient {
         return try await getLastDataIfNoneMatch(revision: nil)
     }
 
-    private var origin: String {
+    internal var origin: String {
         if hostname.starts(with: "http://") {
             return hostname
         } else {
@@ -232,7 +248,7 @@ public extension OpenGluckClient {
 
 /* record logs */
 public extension OpenGluckClient {
-    private func toISO8601(_ date: Date = Date()) -> String {
+    internal func toISO8601(_ date: Date = Date()) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZZ"
         return dateFormatter.string(from: date)
@@ -278,64 +294,6 @@ public extension OpenGluckClient {
                     continuation.resume()
                 }, onError: { err in
                     print("Could not record log, ignoring: \(err)")
-                    continuation.resume()
-                })
-            }
-        #endif
-    }
-}
-
-/* APN token registration */
-extension OpenGluckClient {
-    private var app: String {
-        #if os(iOS)
-            return "iOS"
-        #else
-            return "watchOS"
-        #endif
-    }
-
-    private var apnAppSuffix: String {
-        if let apsEnvironment = MobileProvision.read()?.entitlements.apsEnvironment.rawValue.description, apsEnvironment == "production" {
-            return ".production"
-        }
-        #if DEBUG
-            return ""
-        #else
-            return ".production"
-        #endif
-    }
-
-    public func registerPushKit(deviceToken: String) async throws {
-        #if targetEnvironment(simulator)
-            print("ignore(simulator): register: \(deviceToken)")
-        #else
-            try await withCheckedThrowingContinuation { continuation in
-                let client = HTTPSClient(clientHeaders: clientHeaders())
-                let timestamp = Int(Date().timeIntervalSince1970)
-                let url = URL(string: "\(origin)/opengluck/userdata/apn-\(app)-pushkit\(apnAppSuffix)/zadd?score=\(timestamp)&member=\(deviceToken)")!
-                client.put(url: url, onComplete: { _, _ in
-                    continuation.resume()
-                }, onError: { err in
-                    print("Could not register device token, ignoring: \(err)")
-                    continuation.resume()
-                })
-            }
-        #endif
-    }
-
-    public func register(deviceToken: String) async throws {
-        #if targetEnvironment(simulator)
-            print("ignore(simulator): register: \(deviceToken)")
-        #else
-            try await withCheckedThrowingContinuation { continuation in
-                let client = HTTPSClient(clientHeaders: clientHeaders())
-                let timestamp = Int(Date().timeIntervalSince1970)
-                let url = URL(string: "\(origin)/opengluck/userdata/apn-\(app)\(apnAppSuffix)/zadd?score=\(timestamp)&member=\(deviceToken)")!
-                client.put(url: url, onComplete: { _, _ in
-                    continuation.resume()
-                }, onError: { err in
-                    print("Could not register device token, ignoring: \(err)")
                     continuation.resume()
                 })
             }
@@ -425,147 +383,5 @@ public extension OpenGluckClient {
                 continuation.resume(throwing: err)
             })
         }
-    }
-}
-
-/* instant glucose */
-public extension OpenGluckClient {
-    internal struct OpenGluckUploadInstantGlucoseUploadRequest: Encodable {
-        public let instantGlucoseRecords: [OpenGluckInstantGlucoseRecord]
-
-        // swiftlint:disable nesting
-        enum CodingKeys: String, CodingKey {
-            case instantGlucoseRecords = "instant-glucose-records"
-        }
-
-        // swiftlint:enable nesting
-
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(instantGlucoseRecords, forKey: .instantGlucoseRecords)
-        }
-    }
-
-    struct OpenGluckUploadInstantGlucoseResult: Codable {
-        public let success: Bool
-        public let status: String
-    }
-
-    func upload(instantGlucoseRecords: [OpenGluckInstantGlucoseRecord]) async throws -> OpenGluckUploadInstantGlucoseResult {
-        try await withCheckedThrowingContinuation { continuation in
-            let client = HTTPSClient(clientHeaders: clientHeaders())
-            let uploadData: Data
-            do {
-                uploadData = try jsonEncoder.encode(OpenGluckUploadInstantGlucoseUploadRequest(instantGlucoseRecords: instantGlucoseRecords))
-            } catch {
-                continuation.resume(throwing: error)
-                return
-            }
-            client.post(url: URL(string: "\(origin)/opengluck/instant-glucose/upload")!, body: uploadData, onComplete: { response, data in
-                guard let data else {
-                    continuation.resume(throwing: OpenGluckClientError.noData)
-                    return
-                }
-                guard response.statusCode == 200 else {
-                    let body = String(data: data, encoding: .utf8) ?? "(no body)"
-                    continuation.resume(throwing: OpenGluckClientError.uploadFailed(message: "Received status code \(response.statusCode), body: \(body)"))
-                    return
-                }
-                let result: OpenGluckUploadInstantGlucoseResult
-                do {
-                    result = try self.jsonDecoder.decode(OpenGluckUploadInstantGlucoseResult.self, from: data)
-                } catch {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(returning: result)
-            }, onError: { err in
-                print("Could not upload: \(err)")
-                continuation.resume(throwing: err)
-            })
-        }
-    }
-}
-
-/* HbA1c */
-public extension OpenGluckClient {
-    struct OpenGluckHbA1cResult: Codable {
-        public let from_date: Date
-        public let to_date: Date
-        public let hba1c: Double?
-    }
-
-    func getHbA1c(from fromDate: Date, to toDate: Date) async throws -> OpenGluckHbA1cResult {
-        print("Getting HbA1c from \(fromDate) to \(toDate)")
-        return try await withCheckedThrowingContinuation { [self] continuation in
-            let client = HTTPSClient(clientHeaders: clientHeaders())
-            var components = URLComponents()
-            components.queryItems = [
-                URLQueryItem(name: "from", value: self.toISO8601(fromDate)),
-                URLQueryItem(name: "to", value: self.toISO8601(toDate)),
-            ]
-            client.post(url: URL(string: "\(origin)/opengluck/hba1c\(components.string ?? "")")!, onComplete: { response, data in
-                guard let data else {
-                    continuation.resume(throwing: OpenGluckClientError.noData)
-                    return
-                }
-                guard response.statusCode == 200 else {
-                    let body = String(data: data, encoding: .utf8) ?? "(no body)"
-                    continuation.resume(throwing: OpenGluckClientError.uploadFailed(message: "Received status code \(response.statusCode), body: \(body)"))
-                    return
-                }
-                let result: OpenGluckHbA1cResult
-                do {
-                    result = try self.jsonDecoder.decode(OpenGluckHbA1cResult.self, from: data)
-                } catch {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(returning: result)
-            }, onError: { err in
-                print("Could not get HbA1c: \(err)")
-                continuation.resume(throwing: err)
-            })
-        }
-    }
-
-    func getHbA1cToday() async throws -> OpenGluckHbA1cResult {
-        let now = Date()
-        let midnight = Calendar.current.startOfDay(for: now)
-        return try await getHbA1c(from: midnight, to: now)
-    }
-
-    func getHbA1cLast24Hours() async throws -> OpenGluckHbA1cResult {
-        let now = Date()
-        let fromDate = Calendar.current.date(byAdding: .day, value: -1, to: now)!
-        return try await getHbA1c(from: fromDate, to: now)
-    }
-
-    func getHbA1cYesterday() async throws -> OpenGluckHbA1cResult {
-        let now = Date()
-        let midnight = Calendar.current.startOfDay(for: now)
-        let fromDate = Calendar.current.date(byAdding: .day, value: -1, to: midnight)!
-        return try await getHbA1c(from: fromDate, to: midnight)
-    }
-
-    func getHbA1cLast7Days() async throws -> OpenGluckHbA1cResult {
-        let now = Date()
-        let midnight = Calendar.current.startOfDay(for: now)
-        let fromDate = Calendar.current.date(byAdding: .day, value: -7, to: midnight)!
-        return try await getHbA1c(from: fromDate, to: midnight)
-    }
-
-    func getHbA1cLast30Days() async throws -> OpenGluckHbA1cResult {
-        let now = Date()
-        let midnight = Calendar.current.startOfDay(for: now)
-        let fromDate = Calendar.current.date(byAdding: .day, value: -30, to: midnight)!
-        return try await getHbA1c(from: fromDate, to: midnight)
-    }
-
-    func getHbA1cLast90Days() async throws -> OpenGluckHbA1cResult {
-        let now = Date()
-        let midnight = Calendar.current.startOfDay(for: now)
-        let fromDate = Calendar.current.date(byAdding: .day, value: -90, to: midnight)!
-        return try await getHbA1c(from: fromDate, to: midnight)
     }
 }
