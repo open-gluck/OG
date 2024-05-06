@@ -29,7 +29,9 @@ public actor OpenGluckSyncClient {
     public private(set) var lastSyncLastDataStart: Date?
     public private(set) var lastSyncLastDataEnd: Date?
 
-    public init() {}
+    public init(delegate: OpenGluckSyncClientDelegate? = nil) {
+        self.delegate = delegate
+    }
 
     var client: OpenGluckClient? {
         delegate!.getClient()
