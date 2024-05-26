@@ -1,5 +1,4 @@
 import Foundation
-@preconcurrency import struct Foundation.Date
 
 public struct LastData: Codable, Sendable {
     public let revision: Int64

@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import struct Foundation.Date
 
 public struct OpenGluckInstantGlucoseRecord: Hashable, Codable, Sendable {
     public let timestamp: Date
