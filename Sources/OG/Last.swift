@@ -1,4 +1,5 @@
 import Foundation
+@preconcurrency import struct Foundation.Date
 
 public struct LastData: Codable, Sendable {
     public let revision: Int64
@@ -6,6 +7,7 @@ public struct LastData: Codable, Sendable {
     public let lowRecords: [OpenGluckLowRecord]?
     public let insulinRecords: [OpenGluckInsulinRecord]?
     public let foodRecords: [OpenGluckFoodRecord]?
+    public let instantGlucoseRecords: [OpenGluckInstantGlucoseRecord]?
 
     enum CodingKeys: String, CodingKey {
         case revision
@@ -13,6 +15,7 @@ public struct LastData: Codable, Sendable {
         case lowRecords = "low-records"
         case insulinRecords = "insulin-records"
         case foodRecords = "food-records"
+        case instantGlucoseRecords = "instant-glucose-records"
     }
 
     public init(from decoder: Decoder) throws {
@@ -22,6 +25,7 @@ public struct LastData: Codable, Sendable {
         lowRecords = try container.decodeIfPresent([OpenGluckLowRecord].self, forKey: .lowRecords) ?? []
         insulinRecords = try container.decodeIfPresent([OpenGluckInsulinRecord].self, forKey: .insulinRecords) ?? []
         foodRecords = try container.decodeIfPresent([OpenGluckFoodRecord].self, forKey: .foodRecords) ?? []
+        instantGlucoseRecords = try container.decodeIfPresent([OpenGluckInstantGlucoseRecord].self, forKey: .instantGlucoseRecords) ?? []
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -31,5 +35,6 @@ public struct LastData: Codable, Sendable {
         try container.encode(lowRecords, forKey: .lowRecords)
         try container.encode(insulinRecords, forKey: .insulinRecords)
         try container.encode(foodRecords, forKey: .foodRecords)
+        try container.encode(instantGlucoseRecords, forKey: .instantGlucoseRecords)
     }
 }
