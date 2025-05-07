@@ -1,6 +1,6 @@
 import Foundation
 
-public struct CurrentData: Codable {
+public struct CurrentData: Codable, Sendable {
     public let currentGlucoseRecord: OpenGluckGlucoseRecord?
     public let currentInstantGlucoseRecord: OpenGluckInstantGlucoseRecord?
     public let lastHistoricGlucoseRecord: OpenGluckGlucoseRecord?
