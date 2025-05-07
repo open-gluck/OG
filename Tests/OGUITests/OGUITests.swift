@@ -2,7 +2,8 @@
 import XCTest
 
 final class OGUITests: XCTestCase {
-    func testExample() throws {
+    @MainActor
+    func testExample() async throws {
         // XCTest Documenation
         // https://developer.apple.com/documentation/xctest
 

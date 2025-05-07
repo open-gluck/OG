@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Episode: String, Codable {
+public enum Episode: String, Codable, Sendable {
     case unknown
     case disconnected
     case error
