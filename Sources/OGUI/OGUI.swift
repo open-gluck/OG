@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 public final class OGUI {
     private init() {}
 
