@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import struct Foundation.Date
 
 public struct CurrentData: Codable, Sendable {
     public let currentGlucoseRecord: OpenGluckGlucoseRecord?
