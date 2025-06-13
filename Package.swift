@@ -6,8 +6,9 @@ import PackageDescription
 let package = Package(
     name: "OG",
     platforms: [
-        .iOS("16.0"),
-        .watchOS("9.1"),
+        .iOS("17.0"),
+        .watchOS("10.0"),
+        .macOS("15.0"),
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
