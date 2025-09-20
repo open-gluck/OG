@@ -3,31 +3,29 @@
 
 import PackageDescription
 
-let package = Package(
-    name: "OG",
-    platforms: [
-        .iOS("17.0"),
-        .watchOS("10.0"),
-        .macOS("15.0"),
-    ],
-    products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "OG",
-            targets: ["OG"]
+#if !os(Linux)
+    let targets: [Target] = [
+        .target(
+            name: "OG"),
+        .testTarget(
+            name: "OGTests",
+            dependencies: ["OG"]
         ),
-        .library(
+        .target(
             name: "OGUI",
-            targets: ["OGUI"]
+            dependencies: ["OG"]
         ),
-        .executable(
-            name: "cli",
-            targets: ["CLI"]
+        .testTarget(
+            name: "OGUITests",
+            dependencies: ["OGUI"]
         ),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
+        .executableTarget(
+            name: "CLI",
+            dependencies: ["OG"]
+        ),
+    ]
+#else
+    let targets: [Target] = [
         .target(
             name: "OG"),
         .testTarget(
@@ -50,4 +48,29 @@ let package = Package(
             dependencies: ["SwiftUI", "OG"]
         ),
     ]
+#endif
+
+let package = Package(
+    name: "OG",
+    platforms: [
+        .iOS("17.0"),
+        .watchOS("10.0"),
+        .macOS("15.0"),
+    ],
+    products: [
+        // Products define the executables and libraries a package produces, making them visible to other packages.
+        .library(
+            name: "OG",
+            targets: ["OG"]
+        ),
+        .library(
+            name: "OGUI",
+            targets: ["OGUI"]
+        ),
+        .executable(
+            name: "cli",
+            targets: ["CLI"]
+        ),
+    ],
+    targets: targets
 )
