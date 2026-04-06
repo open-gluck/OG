@@ -1,3 +1,4 @@
+// swiftlint:disable file_length
 import Foundation
 
 public enum OpenGluckClientError: Error {
@@ -69,8 +70,12 @@ public extension OpenGluckClient {
     func getLastDataIfNoneMatch(revision: Int64?) async throws -> LastData? {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
+            guard let url = URL(string: "\(origin)/opengluck/last") else {
+                continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                return
+            }
             client.get(
-                url: URL(string: "\(origin)/opengluck/last")!,
+                url: url,
                 ifNoneMatch: revision == nil ? nil : String(revision!),
                 onComplete: { response, data in
                     guard response.statusCode != 304 else {
@@ -109,8 +114,12 @@ public extension OpenGluckClient {
     func getCurrentDataIfNoneMatch(revision: Int64?) async throws -> CurrentData? {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
+            guard let url = URL(string: "\(origin)/opengluck/current") else {
+                continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                return
+            }
             client.get(
-                url: URL(string: "\(origin)/opengluck/current")!,
+                url: url,
                 ifNoneMatch: revision == nil ? nil : String(revision!),
                 onComplete: { response, data in
                     guard response.statusCode != 304 else {
@@ -191,8 +200,12 @@ public extension OpenGluckClient {
     func getHasRealTime() async throws -> Bool? {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
+            guard let url = URL(string: "\(origin)/opengluck/userdata/cgm-current-device-properties") else {
+                continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                return
+            }
             client.get(
-                url: URL(string: "\(origin)/opengluck/userdata/cgm-current-device-properties")!,
+                url: url,
                 onComplete: { _, data in
                     Task {
                         do {
@@ -222,9 +235,12 @@ public extension OpenGluckClient {
     func getCurrentEpisode() async throws -> (Episode?, Date?) {
         return try await withCheckedThrowingContinuation { continuation in
             let client = HTTPSClient(clientHeaders: clientHeaders())
-            let url = "\(origin)/opengluck/episode/current"
+            guard let url = URL(string: "\(origin)/opengluck/episode/current") else {
+                continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                return
+            }
             client.get(
-                url: URL(string: url)!,
+                url: url,
                 onComplete: { _, data in
                     Task {
                         do {
@@ -263,7 +279,7 @@ public extension OpenGluckClient {
         #if targetEnvironment(simulator)
             print("ignore(simulator): recordLog: \(message)")
         #else
-            try? await withCheckedThrowingContinuation { continuation in
+            try? await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
                 let client = HTTPSClient(clientHeaders: clientHeaders())
                 let payload: [String: String] = [
                     "timestamp": self.toISO8601(),
@@ -271,7 +287,11 @@ public extension OpenGluckClient {
                 ]
                 // swiftlint:disable:next force_try
                 let body = String(data: try! JSONEncoder().encode(payload), encoding: .utf8)!
-                client.put(url: URL(string: "\(origin)/opengluck/userdata/log-\(target)/lpush")!, body: body.data(using: .utf8), onComplete: { _, _ in
+                guard let url = URL(string: "\(origin)/opengluck/userdata/log-\(target)/lpush") else {
+                    continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                    return
+                }
+                client.put(url: url, body: body.data(using: .utf8), onComplete: { _, _ in
                     continuation.resume()
                 }, onError: { err in
                     print("Could not record log, ignoring: \(err)")
@@ -285,7 +305,7 @@ public extension OpenGluckClient {
         #if targetEnvironment(simulator)
             print("ignore(simulator): recordLog: \(message)")
         #else
-            try? await withCheckedThrowingContinuation { continuation in
+            try? await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
                 let client = HTTPSClient(clientHeaders: clientHeaders())
                 let payload: [String: String] = [
                     "timestamp": self.toISO8601(),
@@ -295,7 +315,11 @@ public extension OpenGluckClient {
                 let body = String(data: try! JSONEncoder().encode(payload), encoding: .utf8)!
                     // swiftlint:disable:next force_try
                     .replacingOccurrences(of: "\"FILLER\"", with: String(data: try! JSONEncoder().encode(message), encoding: .utf8)!)
-                client.put(url: URL(string: "\(origin)/opengluck/userdata/log-\(target)/lpush")!, body: body.data(using: .utf8), onComplete: { _, _ in
+                guard let url = URL(string: "\(origin)/opengluck/userdata/log-\(target)/lpush") else {
+                    continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                    return
+                }
+                client.put(url: url, body: body.data(using: .utf8), onComplete: { _, _ in
                     continuation.resume()
                 }, onError: { err in
                     print("Could not record log, ignoring: \(err)")
@@ -365,7 +389,11 @@ public extension OpenGluckClient {
                 continuation.resume(throwing: error)
                 return
             }
-            client.post(url: URL(string: "\(origin)/opengluck/upload")!, body: uploadData, onComplete: { response, data in
+            guard let url = URL(string: "\(origin)/opengluck/upload") else {
+                continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                return
+            }
+            client.post(url: url, body: uploadData, onComplete: { response, data in
                 guard let data else {
                     continuation.resume(throwing: OpenGluckClientError.noData)
                     return
