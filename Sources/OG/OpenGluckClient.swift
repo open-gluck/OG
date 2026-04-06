@@ -2,6 +2,7 @@ import Foundation
 
 public enum OpenGluckClientError: Error {
     case noData
+    case invalidURL
     case uploadFailed(message: String)
 }
 
@@ -156,8 +157,12 @@ public extension OpenGluckClient {
                 URLQueryItem(name: "from", value: self.toISO8601(from)),
                 URLQueryItem(name: "to", value: self.toISO8601(until)),
             ]
+            guard let url = URL(string: "\(origin)/opengluck/glucose/find\((components.string ?? "").replacing("+", with: "%2B"))") else {
+                continuation.resume(throwing: OpenGluckClientError.invalidURL)
+                return
+            }
             client.get(
-                url: URL(string: "\(origin)/opengluck/glucose/find\((components.string ?? "").replacing("+", with: "%2B"))")!,
+                url: url,
                 onComplete: { _, data in
                     Task {
                         do {
