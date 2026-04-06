@@ -244,7 +244,7 @@ public extension OpenGluckClient {
                     Task {
                         do {
                             guard let data else {
-                                // or shall we return nil?
+                                continuation.resume(returning: (nil, nil))
                                 return
                             }
                             let currentEpisode = try self.jsonDecoder.decode(CurrentEpisode?.self, from: data)
