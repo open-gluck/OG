@@ -45,7 +45,7 @@ import PackageDescription
         ),
         .executableTarget(
             name: "CLI",
-            dependencies: ["SwiftUI", "OG"]
+            dependencies: ["OG"]
         ),
     ]
 #endif
