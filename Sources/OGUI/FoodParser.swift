@@ -4,14 +4,25 @@ public struct ParsedFood: Equatable {
     public let carbs: Double?
 
     public struct FoodComponent: Equatable {
-        let name: String
-        let carbs: String?
-        let weightInGrams: Double?
+        public let name: String
+        public let carbs: String?
+        public let weightInGrams: Double?
+
+        public init(name: String, carbs: String?, weightInGrams: Double?) {
+            self.name = name
+            self.carbs = carbs
+            self.weightInGrams = weightInGrams
+        }
     }
 
     public struct FoodCarbs: Equatable {
-        let carbs: Double?
-        let percentage: Double?
+        public let carbs: Double?
+        public let percentage: Double?
+
+        public init(carbs: Double?, percentage: Double?) {
+            self.carbs = carbs
+            self.percentage = percentage
+        }
     }
 
     public static func foodComponents(forRecipe recipe: String) -> [String] {
