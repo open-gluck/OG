@@ -21,4 +21,4 @@ EOF
 git commit -a -m 'Bump versions in Swift files'
 
 git tag $newtag -m 'Bump version'
-git push && git push origin $newtag
+git push origin HEAD && git push origin $newtag
