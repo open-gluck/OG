@@ -10,7 +10,13 @@ public actor OpenGluckClientJsonCoders {
     internal let jsonDecoder: JSONDecoder
     internal let jsonEncoder: JSONEncoder
 
-    private static let fractionalSecondsRegex = try! NSRegularExpression(pattern: "\\.\\d+")
+    private static let fractionalSecondsRegex: NSRegularExpression = {
+        do {
+            return try NSRegularExpression(pattern: "\\.\\d+")
+        } catch {
+            fatalError("Failed to initialize fractionalSecondsRegex: \(error)")
+        }
+    }()
 
     init() {
         let isoDateFormatter = ISO8601DateFormatter()
