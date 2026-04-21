@@ -21,7 +21,13 @@ public actor OpenGluckClientJsonCoders {
             let rawDateStr = try container.decode(String.self)
             let range = NSRange(rawDateStr.startIndex..., in: rawDateStr)
             let dateStr = fractionalSecondsRegex.stringByReplacingMatches(in: rawDateStr, range: range, withTemplate: "")
-            return isoDateFormatter.date(from: dateStr)!
+            guard let date = isoDateFormatter.date(from: dateStr) else {
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Expected ISO8601 date string but got '\(rawDateStr)' (normalized to '\(dateStr)')."
+                )
+            }
+            return date
         }
         jsonEncoder = JSONEncoder()
         jsonEncoder.dateEncodingStrategy = .iso8601
