@@ -10,14 +10,30 @@ public actor OpenGluckClientJsonCoders {
     internal let jsonDecoder: JSONDecoder
     internal let jsonEncoder: JSONEncoder
 
+    private static let fractionalSecondsRegex: NSRegularExpression = {
+        do {
+            return try NSRegularExpression(pattern: "\\.\\d+")
+        } catch {
+            fatalError("Failed to initialize fractionalSecondsRegex: \(error)")
+        }
+    }()
+
     init() {
+        let isoDateFormatter = ISO8601DateFormatter()
+        let fractionalSecondsRegex = Self.fractionalSecondsRegex
         jsonDecoder = JSONDecoder()
         jsonDecoder.dateDecodingStrategy = .custom { decoder -> Date in
-            let isoDateFormatter = ISO8601DateFormatter()
             let container = try decoder.singleValueContainer()
-            let dateStr = try container.decode(String.self).replacingOccurrences(of: "\\.\\d+", with: "", options: .regularExpression)
-            let date = isoDateFormatter.date(from: dateStr)
-            return date!
+            let rawDateStr = try container.decode(String.self)
+            let range = NSRange(rawDateStr.startIndex..., in: rawDateStr)
+            let dateStr = fractionalSecondsRegex.stringByReplacingMatches(in: rawDateStr, range: range, withTemplate: "")
+            guard let date = isoDateFormatter.date(from: dateStr) else {
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Invalid ISO8601 date string: \(rawDateStr)"
+                )
+            }
+            return date
         }
         jsonEncoder = JSONEncoder()
         jsonEncoder.dateEncodingStrategy = .iso8601
