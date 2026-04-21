@@ -24,7 +24,7 @@ public actor OpenGluckClientJsonCoders {
             guard let date = isoDateFormatter.date(from: dateStr) else {
                 throw DecodingError.dataCorruptedError(
                     in: container,
-                    debugDescription: "Expected ISO8601 date string but got '\(rawDateStr)' (normalized to '\(dateStr)')."
+                    debugDescription: "Invalid ISO8601 date string: \(rawDateStr)"
                 )
             }
             return date
