@@ -25,14 +25,33 @@ public struct ParsedFood: Equatable {
         }
     }
 
+    // Compiled once and shared: NSRegularExpression is immutable and
+    // thread-safe, and profiling a client app showed NSRegularExpression.init
+    // hot on the main thread because every parse call rebuilt its regexes
+    // (parse(recipe:) alone compiled 1 + 2 per component + 3 per carbs run).
+
+    // split the recipe by commas, but preserve commas within parenthesis
+    // swiftlint:disable:next force_try
+    private static let componentSeparatorRegex = try! NSRegularExpression(pattern: ",(?!([0-9]|[^(]*\\)))", options: [])
+    // the part within the parenthesis, if any
+    // swiftlint:disable:next force_try
+    private static let parenthesisRegex = try! NSRegularExpression(pattern: "\\(([^)]+)\\)?", options: [])
+    // a weight like "42g" or "42.5G"
+    // swiftlint:disable:next force_try
+    private static let weightRegex = try! NSRegularExpression(pattern: "(\\d+(?:[.,]\\d+)?)[gG]", options: [])
+    // split the carbs by commas not followed by a number
+    // swiftlint:disable:next force_try
+    private static let carbsSeparatorRegex = try! NSRegularExpression(pattern: ",(?![0-9])", options: [])
+    // a percentage like "50%" or "12,5%"
+    // swiftlint:disable:next force_try
+    private static let percentageRegex = try! NSRegularExpression(pattern: "(\\d+(?:[,.]\\d+)?)%", options: [])
+
     public static func foodComponents(forRecipe recipe: String) -> [String] {
         // split the recipe by commas, but preserve commas within parenthesis
         // e.g. "a, b" returns ["a", " b"]
         // but "a (b, c), d" returns ["a (b, c)", " d"]
 
-        // swiftlint:disable:next force_try
-        let regexp = try! NSRegularExpression(pattern: ",(?!([0-9]|[^(]*\\)))", options: [])
-        let components = regexp.stringByReplacingMatches(in: recipe, options: [], range: NSRange(location: 0, length: recipe.count), withTemplate: "\n").components(separatedBy: "\n")
+        let components = componentSeparatorRegex.stringByReplacingMatches(in: recipe, options: [], range: NSRange(location: 0, length: recipe.count), withTemplate: "\n").components(separatedBy: "\n")
         // let components = recipe.components(separatedBy: ",(?![^(]*\\))", options: .regularExpression)
         return components.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
     }
@@ -41,9 +60,7 @@ public struct ParsedFood: Equatable {
         // extract the part within the parenthesis, if any
         // e.g. "a (b, c)" returns "b, c"
         // but "a" returns nil
-        // swiftlint:disable:next force_try
-        let regexpParenthesis = try! NSRegularExpression(pattern: "\\(([^)]+)\\)?", options: [])
-        let matches = regexpParenthesis.matches(in: foodComponent, options: [], range: NSRange(location: 0, length: foodComponent.count))
+        let matches = parenthesisRegex.matches(in: foodComponent, options: [], range: NSRange(location: 0, length: foodComponent.count))
         let carbs: String?
         if matches.count > 0 {
             let range = matches[0].range(at: 1)
@@ -53,12 +70,10 @@ public struct ParsedFood: Equatable {
         }
 
         // name is foodComponent without the parenthesis
-        let name = regexpParenthesis.stringByReplacingMatches(in: foodComponent, options: [], range: NSRange(location: 0, length: foodComponent.count), withTemplate: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = parenthesisRegex.stringByReplacingMatches(in: foodComponent, options: [], range: NSRange(location: 0, length: foodComponent.count), withTemplate: "").trimmingCharacters(in: .whitespacesAndNewlines)
 
         // do we match carbs in name?
-        // swiftlint:disable:next force_try
-        let regexpCarbsInGrams = try! NSRegularExpression(pattern: "(\\d+(?:[.,]\\d+)?)[gG]", options: [])
-        let matchesCarbsInGrams = regexpCarbsInGrams.matches(in: name, options: [], range: NSRange(location: 0, length: name.count))
+        let matchesCarbsInGrams = weightRegex.matches(in: name, options: [], range: NSRange(location: 0, length: name.count))
         let weightInGrams: Double?
         if matchesCarbsInGrams.count > 0 {
             let range = matchesCarbsInGrams[0].range(at: 1)
@@ -72,15 +87,11 @@ public struct ParsedFood: Equatable {
 
     public static func parseCarbs(carbs: String) -> FoodCarbs {
         // split the carbs by commas not followed by a number
-        // swiftlint:disable:next force_try
-        let regexpSeparator = try! NSRegularExpression(pattern: ",(?![0-9])", options: [])
-        let components = regexpSeparator.stringByReplacingMatches(in: carbs, options: [], range: NSRange(location: 0, length: carbs.count), withTemplate: "\n").components(separatedBy: "\n")
+        let components = carbsSeparatorRegex.stringByReplacingMatches(in: carbs, options: [], range: NSRange(location: 0, length: carbs.count), withTemplate: "\n").components(separatedBy: "\n")
 
         // do we have any component that is a weight?
-        // swiftlint:disable:next force_try
-        let regexpWeight = try! NSRegularExpression(pattern: "(\\d+(?:[.,]\\d+)?)[gG]", options: [])
         let weights: [Double] = components.map { component in
-            let matchesWeight = regexpWeight.matches(in: component, options: [], range: NSRange(location: 0, length: component.count))
+            let matchesWeight = weightRegex.matches(in: component, options: [], range: NSRange(location: 0, length: component.count))
             if matchesWeight.count > 0 {
                 let range = matchesWeight[0].range(at: 1)
                 return Double(String(component[Range(range, in: component)!]).replacingOccurrences(of: ",", with: "."))
@@ -91,10 +102,8 @@ public struct ParsedFood: Equatable {
         let weight: Double? = weights.isEmpty ? nil : weights.reduce(0, +)
 
         // do we have any component that is a percentage?
-        // swiftlint:disable:next force_try
-        let regexpPercentage = try! NSRegularExpression(pattern: "(\\d+(?:[,.]\\d+)?)%", options: [])
         let percentages: [Double] = components.map { component in
-            let matchesPercentage = regexpPercentage.matches(in: component, options: [], range: NSRange(location: 0, length: component.count))
+            let matchesPercentage = percentageRegex.matches(in: component, options: [], range: NSRange(location: 0, length: component.count))
             if matchesPercentage.count > 0 {
                 let range = matchesPercentage[0].range(at: 1)
                 return Double(String(component[Range(range, in: component)!]).replacingOccurrences(of: ",", with: "."))
